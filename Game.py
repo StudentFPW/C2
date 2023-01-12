@@ -5,31 +5,31 @@ import random
 
 class ShotOverMap(Exception):
     def __str__(self):
-        return "За поле боя"
+        return "За поле боя!"
 
 
 class SameShot(Exception):
     def __str__(self):
-        return "Вы уже туда стреляли"
+        return "Вы уже туда стреляли!"
 
 
 class Missed(Exception):
     def __str__(self):
-        return "Вы не попали"
+        return "Вы не попали!"
 
 
 ########################################################################################################################
 
-# Это класс, представляющий поле
+# Это класс, представляющий поле.
 class Field:
     def __init__(self, _length=7) -> None:
         self.__length = _length
         # Это способ создать список в одну строку.
-        self.field = [['O' for i in range(self.__length)] for i in range(self.__length)]
+        self.field = [['O' for ROW in range(self.__length)] for COLUMN in range(self.__length)]
 
     def set_ship_on_field_01(self) -> list:
         """
-        Эта функция устанавливает корабль на поле
+        Эта функция устанавливает корабль на поле.
         """
         # Создание случайных чисел для кораблей.
         _ship_3 = random.randint(1, 2)
@@ -81,18 +81,18 @@ class Field:
 
 # > Класс, представляющий уставку.
 class SetPoint:
-    __row_obj = 1
-    __column_obj = 7
+    __nr1_obj = 1
+    __nr2_obj = 7
 
     @classmethod
     def __symbol(cls, arg) -> bool:
         """
-        `__symbol` возвращает `True`, если `arg` является символом 1 - 7, `False` в противном случае
+        `__symbol` возвращает `True`, если `arg` является символом 1 - 7, `False` в противном случае.
 
         :param cls: Класс, к которому применяется декоратор.
         :param arg: Аргумент, который нужно проверить.
         """
-        return cls.__row_obj <= arg <= cls.__column_obj
+        return cls.__nr1_obj <= arg <= cls.__nr2_obj
 
     def __init__(self, check_y, check_x) -> None:
         self.__row = self.__column = 0
@@ -122,19 +122,30 @@ class Ship:
         self.y = empty_y
         self.x = empty_x
 
-    def set_date(self, fill_y, fill_x) -> None:
+    def set_data(self, fill_y, fill_x) -> None:
         self.y = fill_y
         self.x = fill_x
 
     def set_fields(self, field) -> None:
         self.fields = field
 
-    def check_shot(self) -> list:
+    def check_ship(self) -> bool:
         """
-        Если выстрел игрока является попаданием, поле обновляется с помощью X,
-        если это промах, поле обновляется с помощью T.
+        Эта функция проверяет, находится ли корабль на карте, остались ли еще корабли.
+        """
+        true_or_false = True
+        for row in range(len(self.fields)):
+            for column in range(len(self.fields)):
+                if self.fields[row][column] != "■":
+                    true_or_false = False
+                    continue
+                else:
+                    true_or_false = True
+        return true_or_false
 
-        :return: Список полей возвращается.
+    def get_shot(self) -> list:
+        """
+        Эта функция проверяет, является ли выстрел попаданием или промахом.
         """
         if self.fields[self.y][self.x] == "■":
             self.fields[self.y][self.x] = "X"
@@ -145,13 +156,41 @@ class Ship:
         else:
             raise SameShot
 
+
 ########################################################################################################################
 
-# - Классы игроков.
+class Players:
+    def __init__(self, get_y=0, get_x=0):
+        self.get_y = get_y
+        self.get_x = get_x
+
+    def user_data(self, y, x):
+        """
+        Функция user_data принимает два аргумента, y и x, и присваивает их переменным get_y и get_x.
+
+        :param y: Координата Y щелчка мыши пользователя.
+        :param x: X-координата щелчка мыши пользователя.
+        """
+        self.get_y = y
+        self.get_x = x
+
+    def get_user_data(self):
+        return self.get_y, self.get_x
+
+    def get_II_data(self):
+        """
+        Возвращает случайное целое число от 1 до 7.
+        :return: случайные целые числа, сгенерированные функцией random.randint.
+        """
+        self.get_y, self.get_x = random.randint(1, 7), random.randint(1, 7)
+        return self.get_y, self.get_x
+
+########################################################################################################################
+
 # - Основной класс игры.
 
 # Игрок играет с компьютером. Компьютер делает ходы наугад, но не ходит по тем клеткам, в которые он уже ходил.
 
 # Если возникают непредвиденные ситуации, выбрасывать и обрабатывать исключения.
 
-# Побеждает тот, кто быстрее всех разгромит корабли противника.
+########################################################################################################################
