@@ -1,7 +1,10 @@
+# Игру разработал студент (Leonids Jofe) из школы SkillFactory, курс Full-stack python developer, класс FPW-104
+
 import random
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+
 
 class ShotOverMap(Exception):
     def __str__(self):
@@ -14,21 +17,15 @@ class SameShot(Exception):
 
 
 class Missed(Exception):
-    def __str__(self):
-        return "Вы не попали!"
-
-
-class IsNotInteger(Exception):
-    def __str__(self):
-        return "Не целое число!"
+    pass
 
 
 ########################################################################################################################
 
 # Это класс, представляющий поле.
 class Field:
-    def __init__(self, _length=7) -> None:
-        self.__length = _length
+    def __init__(self, __length=7) -> None:
+        self.__length = __length
         # Это способ создать список в одну строку.
         self.field = [['O' for ROW in range(self.__length)] for COLUMN in range(self.__length)]
 
@@ -115,7 +112,7 @@ class SetPoint:
             self.__row = check_y - 1
             self.__column = check_x - 1
         else:
-            raise ShotOverMap
+            raise ShotOverMap("За поле боя!")
 
     @property
     def get_y(self) -> int:
@@ -130,50 +127,50 @@ class SetPoint:
 
 # Корабль имеет размер и местоположение.
 class Ship:
-    def __init__(self, empty_y=0, empty_x=0, field=None, enemy=None) -> None:
-        if enemy is None:
-            self.enemy_field = []
-        if field is None:
-            self.fields = []
-        self.y = empty_y
-        self.x = empty_x
+    def __init__(self, _empty_y=0, _empty_x=0, _field=None, _enemy=None) -> None:
+        if _enemy is None:
+            self.__enemy_field = []
+        if _field is None:
+            self.__fields = []
+        self.y = _empty_y
+        self.x = _empty_x
 
     def set_shot_data(self, fill_y, fill_x) -> None:
         self.y = fill_y
         self.x = fill_x
 
     def set_fields(self, field) -> None:
-        self.fields = field
+        self.__fields = field
 
     def check_field_enemy(self, enemy) -> None:
-        self.enemy_field = enemy
+        self.__enemy_field = enemy
 
-    def fill_empty_field(self):
-        if self.enemy_field[self.y][self.x] == "■":
-            self.fields[self.y][self.x] = "X"
-            return self.fields
-        if self.enemy_field[self.y][self.x] == "O":
-            self.fields[self.y][self.x] = "T"
-            return self.fields
+    def fill_empty_field(self) -> list:
+        if self.__enemy_field[self.y][self.x] == "■":
+            self.__fields[self.y][self.x] = "X"
+            return self.__fields
+        if self.__enemy_field[self.y][self.x] == "O":
+            self.__fields[self.y][self.x] = "T"
+            return self.__fields
 
-    def get_shot(self) -> list:
-        if self.fields[self.y][self.x] == "■":
-            self.fields[self.y][self.x] = "X"
-            return self.fields
-        elif self.fields[self.y][self.x] == "O":
-            self.fields[self.y][self.x] = "T"
-            # raise Missed
+    def get_shot(self) -> list or Exception:
+        if self.__fields[self.y][self.x] == "■":
+            self.__fields[self.y][self.x] = "X"
+            return self.__fields
+        if self.__fields[self.y][self.x] == "O":
+            self.__fields[self.y][self.x] = "T"
+            raise Missed("мимо!")
         else:
-            raise SameShot
+            raise SameShot("Вы уже туда стреляли!")
 
     def check_ship(self) -> bool:
         """
         Эта функция проверяет, находится ли корабль на карте, остались ли еще корабли.
         """
         true_or_false = True
-        for row in range(len(self.fields)):
-            for column in range(len(self.fields)):
-                if self.fields[row][column] == "■":
+        for row in range(len(self.__fields)):
+            for column in range(len(self.__fields)):
+                if self.__fields[row][column] == "■":
                     true_or_false = True
                     return true_or_false
                 else:
@@ -183,24 +180,31 @@ class Ship:
 
 ########################################################################################################################
 
-array = []
-array_new_point = []
+class GetRandomPoint:
+    __array = []
+    __array_new_point = []
 
+    def __init__(self, _ii_y=0, _ii_x=0, _point=0):
+        self.__y = _ii_y
+        self.__x = _ii_x
+        self.point = _point
 
-def get_II_data() -> tuple:
-    """
-    Возвращает случайный кортеж, (координат для выстрела от компьютера).
-    :return: Кортеж из двух целых чисел.
-    """
-    for row in range(1, 7):
-        for column in range(1, 7):
-            array.append((row, column))
-    point = random.choice(array)
-    if point not in array_new_point:
-        array_new_point.append(point)
-        return point
-    else:
-        return get_II_data()
+    def get_II_data(self):
+        for _row in range(1, 7):
+            for _column in range(1, 7):
+                self.__array.append((_row, _column))
+        self.point = random.choice(self.__array)
+        if self.point not in self.__array_new_point:
+            self.__array_new_point.append(self.point)
+            self.__y, self.__x = self.point
+        else:
+            return self.get_II_data()
+
+    def y(self):
+        return self.__y
+
+    def x(self):
+        return self.__x
 
 
 ########################################################################################################################
@@ -218,13 +222,11 @@ if __name__ == "__main__":
     print()
     print("---------------------------Игра морской бой началась, пусть победить сильнейший--------------------------")
     print()
+
     # Создание трех экземпляров класса `Field`.
     USER_SHOT_II = Field()
     USER = Field()
     II = Field()
-
-    # Первый вызов метода для стрельбы по пустому полю, кораблям противника.
-    # USER_SHOT_II.get_field()
 
     # Создаем карты с кораблями.
     USER.set_ship_on_field_02()
@@ -235,6 +237,10 @@ if __name__ == "__main__":
     SHOT_IN_USER = Ship()
     SHOT_IN_II = Ship()
 
+    # Создание экземпляра класса GetRandomPoint.
+    RANDOMVALUE = GetRandomPoint()
+
+    # Приведенный выше код представляет собой игру линкоров.
     while SHOT_IN_II.check_ship():
         print(USER)
         print("↓ Стреляйте по кораблям противника ↓")
@@ -243,33 +249,68 @@ if __name__ == "__main__":
         try:
             y = int(input("Y = "))
             x = int(input("X = "))
-        except IsNotInteger as e:
-            print("Не целое число!")
+        # Отлов ошибки, если пользователь вводит букву вместо цифры.
+        except ValueError:
+            print()
+            print("Попробуйте снова !")
+            print("Только на этот раз не вводите буквы :)")
+            print()
         else:
-            USER_SET_SHOT = SetPoint(y, x)
+            try:
+                USER_SET_SHOT = SetPoint(y, x)
+            # Отлов ошибки, если пользователь вводит слишком большое число.
+            except ShotOverMap as e:
+                print()
+                print(e, "в этом случае ваш ход не засчитывается :)")
+                print("Попробуйте снова !")
+                print()
+            else:
+                # Это для пустого поля по которому мы гадаем, где корабли врага ↓.
+                SHOT_IN_II_INVISIBLE.set_shot_data(USER_SET_SHOT.get_y, USER_SET_SHOT.get_x)  # Куда мы стреляем.
+                SHOT_IN_II_INVISIBLE.set_fields(USER_SHOT_II.get_field())  # В кого мы стреляем.
+                SHOT_IN_II_INVISIBLE.check_field_enemy(II.get_field())  # Где проверяем данные
+                SHOT_IN_II_INVISIBLE.fill_empty_field()  # Призводим выстрел по пустому полю.
 
-            # Это для пустого поля по которому мы гадаем, где корабли врага ↓.
-            SHOT_IN_II_INVISIBLE.set_shot_data(USER_SET_SHOT.get_y, USER_SET_SHOT.get_x)  # Куда мы стреляем.
-            SHOT_IN_II_INVISIBLE.set_fields(USER_SHOT_II.get_field())  # В кого мы стреляем.
-            SHOT_IN_II_INVISIBLE.check_field_enemy(II.get_field())  # Где проверяем данные
-            SHOT_IN_II_INVISIBLE.fill_empty_field()  # Призводим выстрел по пустому полю.
+                # Тут мы уже призводим выстрел ↓.
+                SHOT_IN_II.set_shot_data(USER_SET_SHOT.get_y, USER_SET_SHOT.get_x)  # Куда мы стреляем.
+                SHOT_IN_II.set_fields(II.get_field())  # В кого мы стреляем.
+                try:
+                    SHOT_IN_II.get_shot()  # Призводим выстрел.
+                # Отлов ошибки, если пользователь вводит не попал в корабль.
+                except Missed:
+                    print()
+                    print("Вы не попали !")
+                # Отлов ошибки, если пользователь вводит одинаковее данные подряд.
+                except SameShot:
+                    print()
+                    print("Вы уже туда стреляли !")
+                finally:
+                    # Он проверяет, остались ли у противника корабли.
+                    if not SHOT_IN_II.check_ship():  # Проверка кораблей нашего врага.
+                        print("Выиграл человек :)")
+                        break
+                    print("----- ↓ Результат выстрела ↓ -----")
+                    print(USER_SHOT_II)
+                    print()
+                    print("------------------- ↓ Ходил компьютер ↓ -------------------")
+                    print()
 
-            # Тут мы уже призводим выстрел ↓.
-            SHOT_IN_II.set_shot_data(USER_SET_SHOT.get_y, USER_SET_SHOT.get_x)  # Куда мы стреляем.
-            SHOT_IN_II.set_fields(II.get_field())  # В кого мы стреляем.
-            SHOT_IN_II.get_shot()  # Призводим выстрел.
+                    # Получение случайных координат для компьютера, чтобы стрелять.
+                    RANDOMVALUE.get_II_data()
 
-        SHOT_IN_II.check_ship()  # Проверка кораблей нашего врага.
+                    II_SET_SHOT = SetPoint(RANDOMVALUE.y(), RANDOMVALUE.x())
+                    SHOT_IN_USER.set_shot_data(II_SET_SHOT.get_y, II_SET_SHOT.get_x)  # Куда мы стреляем.
+                    SHOT_IN_USER.set_fields(USER.get_field())  # В кого мы стреляем.
+                    try:
+                        SHOT_IN_USER.get_shot()  # Призводим выстрел.
+                    # Отлов ошибки, если компьютер вводит не попал в корабль.
+                    except Missed as fail:
+                        print("Компьютер выстрелил", fail)
 
-        print("----- ↓ Результат выстрела ↓ -----")
-        print(USER_SHOT_II)
-        print()
-        print("------------------- ↓ Ходил компьютер ↓ -------------------")
-
-        II_SET_SHOT = SetPoint(get_II_data()[0], get_II_data()[1])
-        SHOT_IN_USER.set_shot_data(II_SET_SHOT.get_y, II_SET_SHOT.get_x)  # Куда мы стреляем.
-        SHOT_IN_USER.set_fields(USER.get_field())  # В кого мы стреляем.
-        SHOT_IN_USER.get_shot()  # Призводим выстрел.
-        SHOT_IN_USER.check_ship()  # Проверка наших кораблей.
+                    # Проверяет есть ли корабль на карте, остались ли корабли.
+                    if not SHOT_IN_USER.check_ship():  # Проверка наших кораблей.
+                        print("---------- Вы проиграли!:) -----------")
+                        print("Люди проиграли и машины захватили мир!")
+                        break
 
 ########################################################################################################################
