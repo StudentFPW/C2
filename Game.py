@@ -180,29 +180,19 @@ class Ship:
 ########################################################################################################################
 
 class GetRandomPoint:
-    __array = []
-
-    def __init__(self, _ii_y=0, _ii_x=0, _point=0):
+    def __init__(self, _ii_y=0, _ii_x=0):
         self.__y = _ii_y
         self.__x = _ii_x
-        self.__point = _point
+        self.__array = []
 
     def get_II_data(self):
-        """
-        Он создает список кортежей, перемешивает список, а затем присваивает первый кортеж переменным __y и __x.
-        """
         for _row in range(1, 7):
             for _column in range(1, 7):
                 self.__array.append((_row, _column))
         random.shuffle(self.__array)
-        for number in self.__array:
-            self.__y, self.__x = number
 
-    def y(self):
-        return self.__y
-
-    def x(self):
-        return self.__x
+    def get_shuffle(self):
+        return self.__array
 
 
 ########################################################################################################################
@@ -214,8 +204,8 @@ if __name__ == "__main__":
     print("                               |     морской бой    |  x - номер столбца |")
     print("                               |-----------------------------------------|")
     print()
-    print("---------------------------Игра морской бой началась, пусть победить сильнейший--------------------------")
     print("------------------------ Буквой X помечаются подбитые корабли. Буквой T — промахи -----------------------")
+    print("---------------------------Игра морской бой началась, пусть победить сильнейший--------------------------")
     print()
 
     # Создание трех экземпляров класса `Field`.
@@ -234,6 +224,8 @@ if __name__ == "__main__":
 
     # Создание экземпляра класса GetRandomPoint.
     RANDOMVALUE = GetRandomPoint()
+    RANDOMVALUE.get_II_data()
+    coordinate = iter(RANDOMVALUE.get_shuffle())
 
     # Приведенный выше код представляет собой игру линкоров.
     while SHOT_IN_II.check_ship():
@@ -291,21 +283,24 @@ if __name__ == "__main__":
                     print("------------------- ↓ Ходил компьютер ↓ -------------------")
 
                     # Получение случайных координат для компьютера, чтобы стрелять.
-                    RANDOMVALUE.get_II_data()
-
-                    II_SET_SHOT = SetPoint(RANDOMVALUE.y(), RANDOMVALUE.x())
-                    SHOT_IN_USER.set_shot_data(II_SET_SHOT.get_y, II_SET_SHOT.get_x)  # Куда мы стреляем.
-                    SHOT_IN_USER.set_fields(USER.get_field())  # В кого мы стреляем.
                     try:
-                        SHOT_IN_USER.get_shot()  # Призводим выстрел.
-                    # Отлов ошибки, если компьютер вводит не попал в корабль.
-                    except Missed as fail:
-                        print(f"---------------- Компьютер выстрелил {fail} ----------------")
-                        print()
-                    # Проверяет есть ли корабль на карте, остались ли корабли.
-                    if not SHOT_IN_USER.check_ship():  # Проверка наших кораблей.
-                        print("---------- Вы проиграли!:) -----------")
-                        print("Люди проиграли и машины захватили мир!")
-                        break
+                        y, x = next(coordinate)
+                    except StopIteration:
+                        print("Перезапустите игру, системный сбой")
+                    else:
+                        II_SET_SHOT = SetPoint(y, x)
+                        SHOT_IN_USER.set_shot_data(II_SET_SHOT.get_y, II_SET_SHOT.get_x)  # Куда мы стреляем.
+                        SHOT_IN_USER.set_fields(USER.get_field())  # В кого мы стреляем.
+                        try:
+                            SHOT_IN_USER.get_shot()  # Призводим выстрел.
+                        # Отлов ошибки, если компьютер вводит не попал в корабль.
+                        except Missed as fail:
+                            print(f"---------------- Компьютер выстрелил {fail} ----------------")
+                            print()
+                        # Проверяет есть ли корабль на карте, остались ли корабли.
+                        if not SHOT_IN_USER.check_ship():  # Проверка наших кораблей.
+                            print("---------- Вы проиграли!:) -----------")
+                            print("Люди проиграли и машины захватили мир!")
+                            break
 
 ########################################################################################################################
