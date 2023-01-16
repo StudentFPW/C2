@@ -24,9 +24,8 @@ class Missed(Exception):
 # Это класс, представляющий поле.
 class Field:
     def __init__(self, __length=7) -> None:
-        self.__length = __length
         # Это способ создать список в одну строку.
-        self.field = [['O' for ROW in range(self.__length)] for COLUMN in range(self.__length)]
+        self.field = [['O' for ROW in range(__length)] for COLUMN in range(__length)]
 
     def set_ship_on_field_01(self) -> list:
         """
@@ -180,24 +179,22 @@ class Ship:
 ########################################################################################################################
 
 class GetRandomPoint:
-    def __init__(self, _ii_y=0, _ii_x=0):
-        self.__y = _ii_y
-        self.__x = _ii_x
+    def __init__(self) -> None:
         self.__array = []
 
-    def get_II_data(self):
-        for _row in range(1, 7):
-            for _column in range(1, 7):
+    def get_II_data(self) -> None:
+        for _row in range(1, 8):
+            for _column in range(1, 8):
                 self.__array.append((_row, _column))
         random.shuffle(self.__array)
 
-    def get_shuffle(self):
+    def get_shuffle(self) -> list:
         return self.__array
 
 
 ########################################################################################################################
 
-# Я не издеваюсь просто не хватило ума довести нижний код до класса
+# Цепь всех событий игры
 def starter():
     print("                               |-----------------------------------------|")
     print("                               |  Приветствуем вас  |  формат ввода: y x |")
@@ -276,7 +273,10 @@ def starter():
                 finally:
                     # Он проверяет, остались ли у противника корабли.
                     if not SHOT_IN_II.check_ship():  # Проверка кораблей нашего врага.
+                        print("#######################################################################################")
+                        print(USER_SHOT_II)
                         print("Выиграл человек :)")
+                        print("#######################################################################################")
                         break
                     print("----- ↓ Результат выстрела ↓ -----")
                     print(USER_SHOT_II)
@@ -287,6 +287,7 @@ def starter():
                     try:
                         y, x = next(coordinate)
                     except StopIteration:
+                        # Можно и без него, но на всякий случай.
                         print("Перезапустите игру, системный сбой")
                     else:
                         II_SET_SHOT = SetPoint(y, x)
@@ -300,12 +301,13 @@ def starter():
                             print()
                         # Проверяет есть ли корабль на карте, остались ли корабли.
                         if not SHOT_IN_USER.check_ship():  # Проверка наших кораблей.
+                            print(USER)
                             print("----------- Вы проиграли! ------------")
-                            print("Люди проиграли и машины захватили мир!")
+                            print("------ И машины захватили мир! -------")
                             break
 
 
 ########################################################################################################################
 
 if __name__ == "__main__":
-    starter()
+    starter()  # Запуск
